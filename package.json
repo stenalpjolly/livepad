@@ -74,5 +74,7 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "bootstrap": "^4.5.3",
+    "react-bootstrap": "^1.4.0"
   }
 }
