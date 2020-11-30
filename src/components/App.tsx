@@ -11,15 +11,24 @@ class App extends React.Component<Record<string, unknown>, undefined> {
         theme: 'ayu-mirage',
         lineNumbers: true
     };
-    state: any;
-    value: any;
+    state: any = {};
+    componentDidMount() {
+        if (typeof(Storage) !== "undefined") {
+            // Retrieve
+            this.setState({
+                value: localStorage.getItem("content")
+            })
+        }
+    }
+
     public render() {
         return (
             <CodeMirror
-                value={this.value}
+                value={this.state.value}
                 options={this.options}
                 onChange={(editor, data, value) => {
-                    console.log(editor, data)
+                    console.log(value)
+                    localStorage.setItem("content", value);
                 }}/>
         );
     }
