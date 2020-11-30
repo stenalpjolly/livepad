@@ -1,12 +1,18 @@
-$bg-color: yellow;
-$border-color: red;
+@import '../../../node_modules/codemirror/lib/codemirror.css';
+@import '../../../node_modules/codemirror/theme/ayu-mirage.css';
 
-.app {
-  font-family: helvetica, arial, sans-serif;
-  padding: 2em;
-  border: 5px solid $border-color;
+body{
+  margin: 0;
+  padding: 0;
+  font-size: large;
 
-  p {
-    background-color: $bg-color;
+  .react-codemirror2 {
+    font-family: helvetica, arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+  }
+  .CodeMirror{
+    height: 100%;
   }
 }
