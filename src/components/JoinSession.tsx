@@ -1,39 +1,41 @@
 import * as React from "react";
-import {useCallback, useState} from "react";
+import {useState} from "react";
 import {Button, FormControl, InputGroup, Modal} from "react-bootstrap";
 import Peer from "peerjs";
 
 export const JoinSession = (props) => {
     const [show, setShow] = useState(true);
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        const userName = document.getElementById("username").getElementsByTagName("input")[0].value;
+        if (userName) {
+            setShow(false);
+            props.setName(userName);
+            return true;
+        }
+        return false;
+    }
     const createSession = () => {
-        const peer = new Peer('synamedia-spj-sample-3');
-        peer.on('connection', connection => {
-            props.setConnection(connection);
-            // console.log("Connection called");
-            // connection.on("data", data => console.log("Data from peer is ", data))
-        });
-        peer.on('open', function(id) {
-            console.log('My peer ID is: ' + id);
-        });
-
-        handleClose();
+        if (handleClose()) {
+            const peer = new Peer('synamedia-spj-sample-3');
+            peer.on('connection', connection => {
+                props.setConnection(connection);
+            });
+            peer.on('open', function(id) {
+                console.log('My peer ID is: ' + id);
+            });
+        }
     };
 
     const joinSession = () => {
-        const peer = new Peer();
-        peer.on('open', function(id) {
-            const connection = peer.connect('synamedia-spj-sample-3');
-            props.setConnection(connection);
-            console.log('My peer ID is: ' + id);
-            // connection.on('open', () => {
-            //     console.log("Connection opened");
-            //     connection.send('hi!');
-            // });
-            // connection.on("data", data => console.log(data));
-        });
-        handleClose();
+        if(handleClose()){
+            const peer = new Peer();
+            peer.on('open', function(id) {
+                const connection = peer.connect('synamedia-spj-sample-3');
+                props.setConnection(connection);
+                console.log('My peer ID is: ' + id);
+            });
+        }
     };
 
     return (
@@ -43,9 +45,9 @@ export const JoinSession = (props) => {
                     <Modal.Title>Session</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <InputGroup className="mb-3">
+                    <InputGroup id="username" className="mb-3">
                         <InputGroup.Prepend>
-                            <InputGroup.Text>Name</InputGroup.Text>
+                            <InputGroup.Text >Name</InputGroup.Text>
                         </InputGroup.Prepend>
                         <FormControl/>
                     </InputGroup>
