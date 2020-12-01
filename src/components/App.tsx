@@ -5,11 +5,13 @@ import {JoinSession} from "./JoinSession";
 
 import "./../assets/scss/App.scss";
 import {useEffect, useState} from "react";
+import Peer from "peerjs";
 
 require('codemirror/mode/javascript/javascript');
 
 function App(){
     const [value, setValue] = useState("");
+    const [conn, setConn] = useState<Peer.DataConnection>();
     const options: any = {
         mode: 'javascript',
         theme: 'ayu-mirage',
@@ -25,16 +27,24 @@ function App(){
         }
     });
 
+    if (conn && conn.open) {
+        conn.on("data", data => {
+            console.log(JSON.parse(data));
+        });
+    }
+
     return (
         <>
-            <JoinSession/>
+            <JoinSession setConnection={setConn}/>
             <CodeMirror
                 value={value}
                 options={options}
                 onChange={(editor, data, value) => {
                     localStorage.setItem("content", value);
+                    if (conn && conn.open) {
+                        conn.send(JSON.stringify(data));
+                    }
                 }}>
-
             </CodeMirror>
         </>
     );

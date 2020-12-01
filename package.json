@@ -74,7 +74,9 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@types/peerjs": "^1.1.0",
     "bootstrap": "^4.5.3",
+    "peerjs": "^1.3.1",
     "react-bootstrap": "^1.4.0"
   }
 }
