@@ -27,22 +27,31 @@ function App(){
         }
     });
 
-    if (conn && conn.open) {
-        conn.on("data", data => {
-            console.log(JSON.parse(data));
-        });
-    }
+    let setNewConnection = function (connection: Peer.DataConnection) {
+        // console.log("Connection set")
+        if(connection){
+            setConn(connection);
+            // console.log("Connection set")
+            connection.on("data", data => {
+                console.log(data);
+                localStorage.setItem("content", value);
+                setValue(data);
+            });
+        }
+    };
 
     return (
         <>
-            <JoinSession setConnection={setConn}/>
+            <JoinSession setConnection={setNewConnection}/>
             <CodeMirror
                 value={value}
                 options={options}
                 onChange={(editor, data, value) => {
                     localStorage.setItem("content", value);
-                    if (conn && conn.open) {
-                        conn.send(JSON.stringify(data));
+                    console.log("Data send");
+                    if (conn) {
+                        console.log("Data send");
+                        conn.send(value);
                     }
                 }}>
             </CodeMirror>

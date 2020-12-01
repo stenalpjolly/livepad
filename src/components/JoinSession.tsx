@@ -10,12 +10,13 @@ export const JoinSession = (props) => {
     const createSession = () => {
         const peer = new Peer('synamedia-spj-sample-3');
         peer.on('connection', connection => {
-            // connection.on("data", data => console.log("Data from peer is ", data))
             props.setConnection(connection);
+            // console.log("Connection called");
+            // connection.on("data", data => console.log("Data from peer is ", data))
         });
-        // peer.on('open', function(id) {
-        //     console.log('My peer ID is: ' + id);
-        // });
+        peer.on('open', function(id) {
+            console.log('My peer ID is: ' + id);
+        });
 
         handleClose();
     };
@@ -25,10 +26,10 @@ export const JoinSession = (props) => {
         peer.on('open', function(id) {
             const connection = peer.connect('synamedia-spj-sample-3');
             props.setConnection(connection);
-            // console.log('My peer ID is: ' + id);
+            console.log('My peer ID is: ' + id);
             // connection.on('open', () => {
             //     console.log("Connection opened");
-            //     // conn.send('hi!');
+            //     connection.send('hi!');
             // });
             // connection.on("data", data => console.log(data));
         });
