@@ -1,45 +1,43 @@
 import * as React from "react";
 import {hot} from "react-hot-loader";
-import "./../assets/scss/App.scss";
 import {UnControlled as CodeMirror} from "react-codemirror2";
 import {JoinSession} from "./JoinSession";
 
+import "./../assets/scss/App.scss";
+import {useEffect, useState} from "react";
+
 require('codemirror/mode/javascript/javascript');
 
-class App extends React.Component<Record<string, unknown>, undefined> {
-    options: any = {
+function App(){
+    const [value, setValue] = useState("");
+    const options: any = {
         mode: 'javascript',
         theme: 'ayu-mirage',
         lineWrapping: true,
         lineNumbers: true
     };
-    state: any = {};
 
-    componentDidMount() {
+    useEffect(() => {
+        // Update the document title using the browser API
         if (typeof (Storage) !== "undefined") {
             // Retrieve
-            this.setState({
-                value: localStorage.getItem("content")
-            })
+            setValue(localStorage.getItem('content'));
         }
-    }
+    });
 
-    public render() {
-        return (
-            <div>
-                <JoinSession/>
-                <CodeMirror
-                    value={this.state.value}
-                    options={this.options}
-                    onChange={(editor, data, value) => {
-                        console.log(value)
-                        localStorage.setItem("content", value);
-                    }}>
+    return (
+        <>
+            <JoinSession/>
+            <CodeMirror
+                value={value}
+                options={options}
+                onChange={(editor, data, value) => {
+                    localStorage.setItem("content", value);
+                }}>
 
-                </CodeMirror>
-            </div>
-        );
-    }
+            </CodeMirror>
+        </>
+    );
 }
 
 declare let module: Record<string, unknown>;
