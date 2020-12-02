@@ -15,6 +15,7 @@ require('codemirror/mode/javascript/javascript');
 function App(){
     const [value, setValue] = useState("");
     const [users, setUserName] = useState([]);
+    const cursorMap = new Map();
 
     let editor: codemirror.Editor;
 
@@ -54,13 +55,9 @@ function App(){
                 });
             });
 
-            const remoteCursorManager = new CodeMirrorCollabExt.RemoteCursorManager({
-                editor: editor,
-                tooltips: true,
-                tooltipDuration: 2
-            });
-
-            const cursor = remoteCursorManager.addCursor("newUser", "#"+Math.floor(Math.random()*16777215).toString(16), users[0]);
+            connection.on("error", (err) => {
+                console.error(err);
+            })
 
             const contentManager = new CodeMirrorCollabExt.EditorContentManager({
                 editor: editor,
@@ -97,25 +94,34 @@ function App(){
                 }
             });
 
-            // Show the cursor
-            cursor.show();
+            const remoteCursorManager = new CodeMirrorCollabExt.RemoteCursorManager({
+                editor: editor,
+                tooltips: true,
+                tooltipDuration: 2
+            });
 
             connection.on("data", data => {
                 const dataInfo = JSON.parse(data);
                 console.log("Recieve" , dataInfo);
                 const value = dataInfo.value;
-                cursor.setIndex(value.index || 0)
                 switch (dataInfo.type){
                     case "Insert":
+                        cursorMap.get(dataInfo.who).setIndex(value.index || 0)
                         contentManager.insert(value.index, value.text);
                         break;
                     case "Delete":
+                        cursorMap.get(dataInfo.who).setIndex(value.index || 0)
                         contentManager.delete(value.index, value.length);
                         break;
                     case "Replace":
+                        cursorMap.get(dataInfo.who).setIndex(value.index || 0)
                         contentManager.replace(value.index, value.length, value.text);
                         break;
                     case "NewConnection":
+                        const cursor = remoteCursorManager.addCursor(value.username, "#"+Math.floor(Math.random()*16777215).toString(16), value.username);
+                        cursor.show();
+                        cursorMap.set(dataInfo.who, cursor);
+
                         users.push(value.username);
                         setUserName([...users]);
                 }
