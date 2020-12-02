@@ -1,5 +1,7 @@
 .idea/
 node_modules/
+dist/
 src/**/*.jsx
 tests/__coverage__/
 tests/**/*.jsx
+/public/
