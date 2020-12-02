@@ -14,9 +14,7 @@ require('codemirror/mode/javascript/javascript');
 
 function App(){
     const [value, setValue] = useState("");
-    const [conn, setConn] = useState<Peer.DataConnection>();
-    const [peerId, setPeerId] = useState<string>();
-    const [userName, setUserName] = useState("");
+    const [users, setUserName] = useState([]);
 
     let editor: codemirror.Editor;
 
@@ -35,14 +33,11 @@ function App(){
         }
     });
 
-    let setNewConnection = function (connection: Peer.DataConnection) {
+    let setNewConnection = (connection: Peer.DataConnection) => {
         if(connection){
-            setConn(connection);
-            setPeerId(connection.peer);
-
-            const sendData = (param: { type: string; value: { index: number; text?: string; length?: number } }) => {
+            const sendData = (param: { type: string; value: { index?: number; text?: string; length?: number ;username?:string} }) => {
                 let dataInfo = {
-                    who: peerId,
+                    who: connection.peer,
                     type: param.type,
                     value: param.value
                 }
@@ -50,13 +45,23 @@ function App(){
                 connection.send(JSON.stringify(dataInfo));
             };
 
+            connection.on("open", () => {
+                sendData({
+                    type: "NewConnection",
+                    value: {
+                        username: users[0]
+                    }
+                });
+            });
+
             const remoteCursorManager = new CodeMirrorCollabExt.RemoteCursorManager({
                 editor: editor,
                 tooltips: true,
                 tooltipDuration: 2
             });
 
-            const cursor = remoteCursorManager.addCursor(userName, "#"+Math.floor(Math.random()*16777215).toString(16), userName);
+            const cursor = remoteCursorManager.addCursor("newUser", "#"+Math.floor(Math.random()*16777215).toString(16), users[0]);
+
             const contentManager = new CodeMirrorCollabExt.EditorContentManager({
                 editor: editor,
                 onInsert(index, text) {
@@ -67,7 +72,7 @@ function App(){
                             text
                         }
                     })
-                    console.log("Insert", index, text);
+                    // console.log("Insert", index, text);
                 },
                 onReplace(index, length, text) {
                     sendData({
@@ -78,7 +83,7 @@ function App(){
                             length
                         }
                     })
-                    console.log("Replace", index, length, text);
+                    // console.log("Replace", index, length, text);
                 },
                 onDelete(index, length) {
                     sendData({
@@ -88,7 +93,7 @@ function App(){
                             length
                         }
                     })
-                    console.log("Delete", index, length);
+                    // console.log("Delete", index, length);
                 }
             });
 
@@ -99,7 +104,7 @@ function App(){
                 const dataInfo = JSON.parse(data);
                 console.log("Recieve" , dataInfo);
                 const value = dataInfo.value;
-                cursor.setIndex(value.index)
+                cursor.setIndex(value.index || 0)
                 switch (dataInfo.type){
                     case "Insert":
                         contentManager.insert(value.index, value.text);
@@ -109,6 +114,10 @@ function App(){
                         break;
                     case "Replace":
                         contentManager.replace(value.index, value.length, value.text);
+                        break;
+                    case "NewConnection":
+                        users.push(value.username);
+                        setUserName([...users]);
                 }
             });
         }
@@ -116,7 +125,10 @@ function App(){
 
     return (
         <>
-            <JoinSession setConnection={setNewConnection} setName={setUserName}/>
+            <JoinSession setConnection={setNewConnection} setName={(usrName)=>{
+                users.push(usrName);
+                setUserName([...users]);
+            }}/>
             <CodeMirror
                 value={value}
                 options={options}
@@ -125,7 +137,7 @@ function App(){
                 }}
             >
             </CodeMirror>
-            <StatusBar userName={userName}/>
+            <StatusBar userName={users}/>
         </>
     );
 }

@@ -17,7 +17,9 @@ export const JoinSession = (props) => {
     }
     const createSession = () => {
         if (handleClose()) {
-            const peer = new Peer('synamedia-spj-sample-3');
+            const peer = new Peer('synamedia-spj-sample-3',{
+                secure: false,
+            });
             peer.on('connection', connection => {
                 props.setConnection(connection);
             });
@@ -29,7 +31,9 @@ export const JoinSession = (props) => {
 
     const joinSession = () => {
         if(handleClose()){
-            const peer = new Peer();
+            const peer = new Peer({
+                secure: false
+            });
             peer.on('open', function(id) {
                 const connection = peer.connect('synamedia-spj-sample-3');
                 props.setConnection(connection);
