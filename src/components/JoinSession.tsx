@@ -8,7 +8,7 @@ export const JoinSession = (props) => {
 
     const handleClose = () => {
         const userName = document.getElementById("username").getElementsByTagName("input")[0].value;
-        if (userName) {
+        if (!userName) {
             setShow(false);
             props.setName(userName);
             return true;
