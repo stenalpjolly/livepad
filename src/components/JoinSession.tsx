@@ -1,10 +1,12 @@
 import * as React from "react";
 import {useState} from "react";
 import {Button, FormControl, InputGroup, Modal} from "react-bootstrap";
-import Peer from "peerjs";
+import * as queryString from "querystring";
+import {ParsedUrlQuery} from "querystring";
 
 export const JoinSession = (props) => {
     const [show, setShow] = useState(true);
+    let query: ParsedUrlQuery = queryString.decode(location.search, "?", "=");
 
     const handleClose = () => {
         const userName = document.getElementById("username").getElementsByTagName("input")[0].value;
@@ -17,31 +19,34 @@ export const JoinSession = (props) => {
     }
     const createSession = () => {
         if (handleClose()) {
-            const peer = new Peer('synamedia-spj-sample-3',{
-                secure: false,
-            });
-            peer.on('connection', connection => {
-                props.setConnection(connection);
-            });
-            peer.on('open', function(id) {
-                console.log('My peer ID is: ' + id);
-            });
+            const sessionId = new Date().getTime();
+            if (history.pushState) {
+                const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?sessionId=${sessionId}`;
+                window.history.pushState({path:newUrl},'',newUrl);
+            }
+            props.setConnection(sessionId);
         }
     };
 
     const joinSession = () => {
-        if(handleClose()){
-            const peer = new Peer({
-                secure: false
-            });
-            peer.on('open', function(id) {
-                const connection = peer.connect('synamedia-spj-sample-3');
-                props.setConnection(connection);
-                console.log('My peer ID is: ' + id);
-            });
+        if (handleClose()) {
+            props.setConnection(query.sessionId);
         }
     };
 
+    let getButton = () => {
+        let btn: JSX.Element = <Button variant="primary" onClick={createSession}>
+            Create Session
+        </Button>
+        if (query.sessionId) {
+            btn = <Button variant="primary" onClick={joinSession}>
+                Join Session
+            </Button>
+        }
+        return <>
+            {btn}
+        </>;
+    }
     return (
         <>
             <Modal show={show}>
@@ -51,18 +56,13 @@ export const JoinSession = (props) => {
                 <Modal.Body>
                     <InputGroup id="username" className="mb-3">
                         <InputGroup.Prepend>
-                            <InputGroup.Text >Name</InputGroup.Text>
+                            <InputGroup.Text>Name</InputGroup.Text>
                         </InputGroup.Prepend>
                         <FormControl/>
                     </InputGroup>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={createSession}>
-                        Create Session
-                    </Button>
-                    <Button variant="primary" onClick={joinSession}>
-                        Join Session
-                    </Button>
+                    {getButton()}
                 </Modal.Footer>
             </Modal>
         </>
