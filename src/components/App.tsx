@@ -47,12 +47,23 @@ function App(){
         // Get Firebase Database reference.
         let firepadRef = firebase.database(app).ref(roomId.toString());
 
+        firepadRef.on("value", (snapshot) =>{
+            const userList = snapshot.val()?.users;
+            const newUserList = [];
+            for (let user in userList) {
+                newUserList.push(user);
+            }
+            setUserName(newUserList);
+        });
+
         // Create CodeMirror (with lineWrapping on).
         editor = CodeMirror(document.getElementById('editor'), options);
         global.CodeMirror = CodeMirror;
 
         // Create Firepad (with rich text toolbar and shortcuts enabled).
-        let firepad = Firepad.fromCodeMirror(firepadRef, editor, {});
+        let firepad = Firepad.fromCodeMirror(firepadRef, editor, {
+            userId: users[0]
+        });
     }
 
     return (
