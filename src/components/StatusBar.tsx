@@ -7,7 +7,7 @@ export const StatusBar = (props) => {
         let getButton = () => {
             let buttons = [];
             for (let index = 0; index < props.userName.length; index++) {
-                buttons.push(<Button size="sm" variant="outline-info" disabled className="pull-left"
+                buttons.push(<Button key={index} size="sm" variant="outline-info" disabled className="pull-left"
                                     text-align="right">{props.userName[index]}</Button>);
                 buttons.push(<>&nbsp;</>);
             }
