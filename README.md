@@ -1,5 +1,7 @@
 # Live Pad 
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/614367234d494bd09ebd35f3cc67e70c)](https://app.codacy.com/gh/stenalpjolly/livepad?utm_source=github.com&utm_medium=referral&utm_content=stenalpjolly/livepad&utm_campaign=Badge_Grade)
+
 ### Link: https://livepad-c8b42.web.app/
 
 ## Installation
