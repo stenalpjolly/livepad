@@ -20,6 +20,7 @@ function App() {
 
   let editor: CodeMirror.Editor;
 
+
   const firebaseConfig = {
     apiKey: "AIzaSyCz-v0dUj8n0IEBaW7Y_jcTdMK0Bl5aEn4",
     authDomain: "livepad-c8b42.firebaseapp.com",
@@ -59,8 +60,8 @@ function App() {
     editor = CodeMirror(document.getElementById("editor"), options);
     global.CodeMirror = CodeMirror;
 
-    // Create Firepad.
-    Firepad.fromCodeMirror(firepadRef, editor, {
+    // Create Firepad .
+     Firepad.fromCodeMirror(firepadRef, editor, {
       userId: users[0],
     });
   }, []);
