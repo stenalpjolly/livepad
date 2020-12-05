@@ -38,11 +38,11 @@ function App() {
     lineNumbers: true,
   };
 
-  const setNewConnection = useCallback((roomId: number) => {
+  const setNewConnection = useCallback((roomId: string) => {
     const app = firebase.initializeApp(firebaseConfig);
 
     // Get Firebase Database reference.
-    const firepadRef = firebase.database(app).ref(roomId.toString());
+    const firepadRef = firebase.database(app).ref(roomId);
 
     firepadRef.on("value", (snapshot) => {
       const userList = snapshot.val()?.users;

@@ -4,7 +4,10 @@ import { Button, FormControl, InputGroup, Modal } from "react-bootstrap";
 import * as queryString from "querystring";
 import { ParsedUrlQuery } from "querystring";
 
-export const JoinSession = (props) => {
+export const JoinSession = (props: {
+  setConnection: (roomId: string) => void;
+  setName: (usrName) => void;
+}) => {
   const [show, setShow] = useState(true);
   const query: ParsedUrlQuery = queryString.decode(location.search, "?", "=");
 
@@ -26,13 +29,13 @@ export const JoinSession = (props) => {
         const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?sessionId=${sessionId}`;
         window.history.pushState({ path: newUrl }, "", newUrl);
       }
-      props.setConnection(sessionId);
+      props.setConnection(sessionId?.toString());
     }
   };
 
   const joinSession = () => {
     if (handleClose()) {
-      props.setConnection(query.sessionId);
+      props.setConnection(query.sessionId?.toString());
     }
   };
 

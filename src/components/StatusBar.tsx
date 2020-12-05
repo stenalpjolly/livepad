@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button, Nav, Navbar } from "react-bootstrap";
 
-export const StatusBar = (props) => {
+export const StatusBar = (props: { userName: string[] }) => {
   let navbar: JSX.Element = <></>;
   if (props.userName && props.userName.length > 0) {
     const getButton = () => {
