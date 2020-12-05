@@ -19,7 +19,6 @@ function App() {
   const [users, setUserName] = useState([]);
 
   let editor: CodeMirror.Editor;
-  let firepadEditor: any;
 
   const firebaseConfig = {
     apiKey: "AIzaSyCz-v0dUj8n0IEBaW7Y_jcTdMK0Bl5aEn4",
@@ -49,17 +48,18 @@ function App() {
       const userList = snapshot.val()?.users;
       const newUserList = [];
       for (const user in userList) {
-        newUserList.push(user);
+        if (userList.hasOwnProperty(user)) {
+          newUserList.push(user);
+        }
       }
       setUserName(newUserList);
     });
 
     // Create CodeMirror (with lineWrapping on).
     editor = CodeMirror(document.getElementById("editor"), options);
-    global.CodeMirror = CodeMirror;
 
-    // Create Firepad (with rich text toolbar and shortcuts enabled).
-    firepadEditor = Firepad.fromCodeMirror(firepadRef, editor, {
+    // Create Firepad
+    Firepad.fromCodeMirror(firepadRef, editor, {
       userId: users[0],
     });
   }, []);
