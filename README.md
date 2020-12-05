@@ -2,7 +2,19 @@
 
 ### Link: https://livepad-c8b42.web.app/
 
+## Feature list
 
+- [x] Editor with create and join session option
+- [ ] Separate interviewer and candidate session
+- [ ] Validate session creation 
+- [ ] Introduce read-only sections inside the editor
+- [ ] Code highlight only for interviewer
+- [ ] Private note session for interviewer
+- [ ] Option to accept and reject incoming requests
+- [ ] Option to end the interview and make it read only
+- [ ] Option to playback completed interview
+- [ ] Option to download the interview into a local JSON file
+- [ ] Option to load a local file and playback interview
 
 ## Installation
 1. Clone/download repo
