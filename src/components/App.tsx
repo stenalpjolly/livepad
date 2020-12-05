@@ -39,14 +39,14 @@ function App() {
     lineNumbers: true,
   };
 
-  const setNewConnection = useCallback((sessionId: Session.Info) => {
-    users.push(sessionId.userName);
+  const setNewConnection = useCallback((sessionInfo: Session.Info) => {
+    users.push(sessionInfo.userName);
     setUserName([...users]);
 
     const app = firebase.initializeApp(firebaseConfig);
 
     // Get Firebase Database reference.
-    const firepadRef = firebase.database(app).ref(sessionId.roomId);
+    const firepadRef = firebase.database(app).ref(sessionInfo.roomId);
 
     firepadRef.on("value", (snapshot) => {
       const userList = snapshot.val()?.users;
@@ -59,7 +59,9 @@ function App() {
       setUserName(newUserList);
     });
 
-    // Create CodeMirror (with lineWrapping on).
+    if (sessionInfo.sessionType === Session.Type.CANDIDATE) {
+      options.mode = "";
+    }
     editor = CodeMirror(document.getElementById("editor"), options);
 
     // Create Firepad

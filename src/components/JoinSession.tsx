@@ -10,6 +10,7 @@ export const JoinSession = (props: {
 }): JSX.Element => {
   const [show, setShow] = useState(true);
   const query: ParsedUrlQuery = queryString.decode(location.search, "?", "=");
+  const storedInfo = JSON.parse(localStorage.getItem(query.sessionId?.toString()) || "{}");
 
   const handleClose = (): string => {
     const userName = document
@@ -46,7 +47,7 @@ export const JoinSession = (props: {
       const session: Session.Info = {
         roomId: query.sessionId?.toString(),
         userName: username,
-        sessionType: Session.Type.CANDIDATE,
+        sessionType: storedInfo?.sessionType ?? Session.Type.CANDIDATE,
       };
       props.setConnection(session);
     }
@@ -78,7 +79,7 @@ export const JoinSession = (props: {
             <InputGroup.Prepend>
               <InputGroup.Text>Name</InputGroup.Text>
             </InputGroup.Prepend>
-            <FormControl />
+            <FormControl value={storedInfo.userName}/>
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>{getButton()}</Modal.Footer>
