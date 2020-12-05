@@ -3,39 +3,52 @@ import { useState } from "react";
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap";
 import * as queryString from "querystring";
 import { ParsedUrlQuery } from "querystring";
+import { Session } from "../utils/Session";
 
 export const JoinSession = (props: {
-  setConnection: (roomId: string) => void;
-  setName: (usrName) => void;
-}) => {
+  setConnection: (sessionInfo: Session.Info) => void;
+}): JSX.Element => {
   const [show, setShow] = useState(true);
   const query: ParsedUrlQuery = queryString.decode(location.search, "?", "=");
 
-  const handleClose = () => {
+  const handleClose = (): string => {
     const userName = document
       .getElementById("username")
       .getElementsByTagName("input")[0].value;
     if (userName) {
       setShow(false);
-      props.setName(userName);
-      return true;
+      return userName;
     }
-    return false;
+    return null;
   };
   const createSession = () => {
-    if (handleClose()) {
+    const username = handleClose();
+    if (username) {
       const sessionId = new Date().getTime();
       if (history.pushState) {
         const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?sessionId=${sessionId}`;
         window.history.pushState({ path: newUrl }, "", newUrl);
       }
-      props.setConnection(sessionId?.toString());
+      const session: Session.Info = {
+        roomId: sessionId?.toString(),
+        userName: username,
+        sessionType: Session.Type.HOST,
+      };
+      localStorage.setItem(session.roomId, JSON.stringify(session));
+
+      props.setConnection(session);
     }
   };
 
   const joinSession = () => {
-    if (handleClose()) {
-      props.setConnection(query.sessionId?.toString());
+    const username = handleClose();
+    if (username) {
+      const session: Session.Info = {
+        roomId: query.sessionId?.toString(),
+        userName: username,
+        sessionType: Session.Type.CANDIDATE,
+      };
+      props.setConnection(session);
     }
   };
 

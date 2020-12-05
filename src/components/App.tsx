@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 import { StatusBar } from "./StatusBar";
 import * as CodeMirror from "codemirror";
 import firebase from "firebase";
+import { Session } from "../utils/Session";
 
 require("firebase/firebase-database");
 
@@ -38,11 +39,14 @@ function App() {
     lineNumbers: true,
   };
 
-  const setNewConnection = useCallback((roomId: string) => {
+  const setNewConnection = useCallback((sessionId: Session.Info) => {
+    users.push(sessionId.userName);
+    setUserName([...users]);
+
     const app = firebase.initializeApp(firebaseConfig);
 
     // Get Firebase Database reference.
-    const firepadRef = firebase.database(app).ref(roomId);
+    const firepadRef = firebase.database(app).ref(sessionId.roomId);
 
     firepadRef.on("value", (snapshot) => {
       const userList = snapshot.val()?.users;
@@ -66,13 +70,7 @@ function App() {
 
   return (
     <>
-      <JoinSession
-        setConnection={setNewConnection}
-        setName={(usrName) => {
-          users.push(usrName);
-          setUserName([...users]);
-        }}
-      />
+      <JoinSession setConnection={setNewConnection} />
       <div id={"editor"} className={"react-codemirror2"} />
       <StatusBar userName={users} />
     </>
