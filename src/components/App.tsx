@@ -8,6 +8,7 @@ import { StatusBar } from "./StatusBar";
 import * as CodeMirror from "codemirror";
 import firebase from "firebase";
 import { Session } from "../utils/Session";
+import {EditorConfiguration} from "codemirror";
 
 require("firebase/firebase-database");
 
@@ -32,11 +33,12 @@ function App() {
     measurementId: "G-S4DSYBQCC6",
   };
 
-  const options = {
+  const options: EditorConfiguration = {
     mode: "javascript",
     theme: "ayu-mirage",
     lineWrapping: true,
     lineNumbers: true,
+    cursorBlinkRate: 0,
   };
 
   const setNewConnection = useCallback((sessionInfo: Session.Info) => {
@@ -65,8 +67,15 @@ function App() {
     editor = CodeMirror(document.getElementById("editor"), options);
 
     // Create Firepad
-    Firepad.fromCodeMirror(firepadRef, editor, {
+    const firepad = Firepad.fromCodeMirror(firepadRef, editor, {
       userId: users[0],
+    });
+
+    firepad.on('cursor', function (params) {
+      let cursor = document.getElementsByClassName("other-client").item(0);
+      if (cursor) {
+        cursor.innerHTML = `<span>${params}</span>`;
+      }
     });
   }, []);
 
