@@ -38,7 +38,6 @@ function App() {
     theme: "ayu-mirage",
     lineWrapping: true,
     lineNumbers: true,
-    cursorBlinkRate: 0,
   };
 
   const setNewConnection = useCallback((sessionInfo: Session.Info) => {
