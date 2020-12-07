@@ -7,7 +7,10 @@
 ## Feature list
 
 - [x] Editor with create and join session option
-- [ ] Separate interviewer and candidate session
+- [x] Separate interviewer and candidate session
+- [x] Disable code highlight on candidate
+- [x] Cursor tooltip along the username  
+- [ ] Option to enable code highlight for the candidate on a session create 
 - [ ] Validate session creation 
 - [ ] Introduce read-only sections inside the editor
 - [ ] Code highlight only for interviewer

@@ -36,7 +36,6 @@ export const JoinSession = (props: {
         sessionType: Session.Type.HOST,
       };
       localStorage.setItem(session.roomId, JSON.stringify(session));
-
       props.setConnection(session);
     }
   };
@@ -49,6 +48,7 @@ export const JoinSession = (props: {
         userName: username,
         sessionType: storedInfo?.sessionType ?? Session.Type.CANDIDATE,
       };
+      localStorage.setItem(session.roomId, JSON.stringify(session));
       props.setConnection(session);
     }
   };
@@ -79,7 +79,7 @@ export const JoinSession = (props: {
             <InputGroup.Prepend>
               <InputGroup.Text>Name</InputGroup.Text>
             </InputGroup.Prepend>
-            <FormControl value={storedInfo.userName}/>
+            <FormControl defaultValue={storedInfo.userName}/>
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>{getButton()}</Modal.Footer>
