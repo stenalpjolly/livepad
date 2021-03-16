@@ -1,6 +1,7 @@
 @import '../../../node_modules/codemirror/lib/codemirror.css';
 @import '../../../node_modules/codemirror/theme/ayu-mirage.css';
 @import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+@import "../../../node_modules/react-datepicker/dist/react-datepicker.css";
 
 body {
   margin: 0;
@@ -17,5 +18,40 @@ body {
 
   .CodeMirror {
     height: 100%;
+  }
+
+  .other-client span {
+    position: absolute;
+    white-space: nowrap;
+    color: #fff;
+    text-shadow: 0 0 1px #000;
+    opacity: 1;
+    font-size: 12px;
+    padding: 2px;
+    margin-top: 15px;
+    font-family: sans-serif;
+    z-index: 4000;
+  }
+
+  .modal-custom-w{
+    max-width: 50%;
+  }
+
+  thead {
+    max-height: 40px;
+  }
+
+  td {
+    p {
+      font-size: 16px;
+      margin-bottom: 0;
+    }
+  }
+
+  .btn-group-toggle {
+    .btn-primary{
+      background-color: #212529;
+      border: 0;
+    }
   }
 }

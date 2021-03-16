@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button, Nav, Navbar } from "react-bootstrap";
+import {EvalModal} from "./EvalModal";
 
 export const StatusBar = (props: { userName: string[] }): JSX.Element => {
   let navbar: JSX.Element = <></>;
@@ -29,6 +30,16 @@ export const StatusBar = (props: { userName: string[] }): JSX.Element => {
           {" "}
           {/*Bootstrap*/}
           <Nav className="mr-auto right30 navbar-nav">{getButton()}</Nav>
+          <Nav className="ml-auto navbar-nav">
+            <Button
+                key="evalModelBtn"
+                size="sm"
+                variant="outline-info"
+                disabled
+                className="pull-right"
+                text-align="right"
+            >Eval<EvalModal/></Button>
+          </Nav>
         </Navbar>
       </>
     );
