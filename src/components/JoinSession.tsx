@@ -53,6 +53,16 @@ export const JoinSession = (props: {
     }
   };
 
+  const handleEnter = (target) =>{
+    if (target && target.code === "Enter") {
+      if (query.sessionId) {
+        joinSession();
+      } else {
+        createSession();
+      }
+    }
+  }
+
   const getButton = () => {
     let btn: JSX.Element = (
       <Button variant="primary" onClick={createSession}>
@@ -79,7 +89,7 @@ export const JoinSession = (props: {
             <InputGroup.Prepend>
               <InputGroup.Text>Name</InputGroup.Text>
             </InputGroup.Prepend>
-            <FormControl defaultValue={storedInfo.userName}/>
+            <FormControl defaultValue={storedInfo.userName} onKeyDown={handleEnter}/>
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>{getButton()}</Modal.Footer>
