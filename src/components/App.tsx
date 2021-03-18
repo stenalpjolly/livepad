@@ -47,7 +47,7 @@ function App() {
     const app = firebase.initializeApp(firebaseConfig);
 
     // Get Firebase Database reference.
-    const firepadRef = firebase.database(app).ref(sessionInfo.roomId);
+    const firepadRef = firebase.database(app).ref(`sessions/${sessionInfo.roomId}`);
 
     firepadRef.on("value", (snapshot) => {
       const userList = snapshot.val()?.users;
