@@ -4,7 +4,6 @@ import {Alert, Button, FormControl, InputGroup, Modal} from "react-bootstrap";
 import * as queryString from "querystring";
 import { ParsedUrlQuery } from "querystring";
 import { Session } from "../utils/Session";
-import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
