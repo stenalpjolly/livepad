@@ -1,14 +1,17 @@
 import * as React from "react";
 import { useState } from "react";
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap";
+import {Alert, Button, FormControl, InputGroup, Modal} from "react-bootstrap";
 import * as queryString from "querystring";
 import { ParsedUrlQuery } from "querystring";
 import { Session } from "../utils/Session";
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
 }): JSX.Element => {
   const [show, setShow] = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
+  const [newUrl, setNewUrl] = useState("");
   const query: ParsedUrlQuery = queryString.decode(location.search, "?", "=");
   const storedInfo = JSON.parse(localStorage.getItem(query.sessionId?.toString()) || "{}");
 
@@ -22,13 +25,16 @@ export const JoinSession = (props: {
     }
     return null;
   };
+
   const createSession = () => {
     const username = handleClose();
     if (username) {
       const sessionId = new Date().getTime();
       if (history.pushState) {
-        const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?sessionId=${sessionId}`;
-        window.history.pushState({ path: newUrl }, "", newUrl);
+        const tempURL = `${window.location.protocol}//${window.location.host}${window.location.pathname}?sessionId=${sessionId}`;
+        copyToClipboard(tempURL);
+        window.history.pushState({ path: tempURL }, "", tempURL);
+        setNewUrl(tempURL);
       }
       const session: Session.Info = {
         roomId: sessionId?.toString(),
@@ -37,7 +43,17 @@ export const JoinSession = (props: {
       };
       localStorage.setItem(session.roomId, JSON.stringify(session));
       props.setConnection(session);
+      setShowInfo(true);
     }
+  };
+
+  const copyToClipboard = str => {
+    const el = document.createElement('textarea');
+    el.value = str;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
   };
 
   const joinSession = () => {
@@ -93,6 +109,23 @@ export const JoinSession = (props: {
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>{getButton()}</Modal.Footer>
+      </Modal>
+      <Modal show={showInfo} onHide={() => {
+        setShowInfo(false)
+      }}>
+        <Modal.Header>
+          <Modal.Title>URL copied to clipboard</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Alert variant='info'>
+            {newUrl}
+          </Alert>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="success" onClick={()=>{
+            setShowInfo(false)
+          }}>Share</Button>
+        </Modal.Footer>
       </Modal>
     </>
   );
