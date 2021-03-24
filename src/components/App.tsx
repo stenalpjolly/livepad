@@ -9,6 +9,7 @@ import * as CodeMirror from "codemirror";
 import firebase from "firebase";
 import { Session } from "../utils/Session";
 import { EditorConfiguration } from "codemirror";
+import {Toast} from "react-bootstrap";
 
 require("firebase/firebase-database");
 
@@ -19,6 +20,7 @@ require("codemirror/mode/javascript/javascript");
 
 function App() {
   const [users, setUserName] = useState([]);
+  const [showToast, setShowToast] = useState(false);
 
   let editor: CodeMirror.Editor;
 
@@ -74,16 +76,34 @@ function App() {
       const cursor = document.querySelector(`[data-clientid=${params}]`);
       if (cursor) {
         cursor.innerHTML = `<span>${params}</span>`;
+        if (!isInViewport(cursor)) {
+          setShowToast(true)
+        } else {
+          setShowToast(false)
+        }
       }
     });
   }, []);
 
   return (
     <>
-      <JoinSession setConnection={setNewConnection} />
+      <JoinSession setConnection={setNewConnection}  />
+      <Toast className={'toast-bottom pulseit alert-primary'} show={showToast}>
+        <Toast.Body>Scroll to see more!</Toast.Body>
+      </Toast>
       <div id={"editor"} className={"react-codemirror2"} />
       <StatusBar userName={users} />
     </>
+  );
+}
+
+function isInViewport(element) {
+  const rect = element.getBoundingClientRect();
+  return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) - 50 &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
   );
 }
 
