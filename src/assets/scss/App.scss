@@ -33,6 +33,13 @@ body {
     z-index: 4000;
   }
 
+  .toast-bottom {
+    position: absolute;
+    z-index: 99;
+    bottom: 50px;
+    right: 25px;
+  }
+
     /* Pulse class and keyframe animation */
   .pulseit {
     -webkit-animation: pulse ease-in 2s infinite;

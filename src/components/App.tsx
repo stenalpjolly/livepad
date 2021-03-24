@@ -88,12 +88,7 @@ function App() {
   return (
     <>
       <JoinSession setConnection={setNewConnection}  />
-      <Toast className={'pulseit alert-primary'} show={showToast} style={{
-        zIndex: 99,
-        position: 'absolute',
-        bottom: 50,
-        right: 25,
-      }}>
+      <Toast className={'toast-bottom pulseit alert-primary'} show={showToast}>
         <Toast.Body>Scroll to see more!</Toast.Body>
       </Toast>
       <div id={"editor"} className={"react-codemirror2"} />
