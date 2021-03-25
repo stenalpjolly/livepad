@@ -73,7 +73,7 @@ function App() {
     });
 
     firepad.on("cursor", function (params) {
-      const cursor = document.querySelector(`[data-clientid=${params}]`);
+      const cursor = document.querySelector(`[data-clientid="${params}"]`);
       if (cursor) {
         cursor.innerHTML = `<span>${params}</span>`;
         if (!isInViewport(cursor)) {
