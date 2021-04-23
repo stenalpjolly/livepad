@@ -18,12 +18,12 @@ const Firepad = require("firepad");
 
 require("codemirror/mode/javascript/javascript");
 
-function setupEditor(editor: CodeMirror.Editor, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, myName: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void) {
+ function setupEditor(editor: CodeMirror.Editor, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, currentUser: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void) {
   editor = CodeMirror(document.getElementById("editor"), options);
 
   // Create Firepad
   const firepad = Firepad.fromCodeMirror(firepadRef, editor, {
-    userId: myName,
+    userId: currentUser,
   });
 
   firepad.on("cursor", function (params) {
@@ -77,18 +77,18 @@ function App() {
     const firepadRef = firebase.database(app).ref(`sessions/${sessionInfo.roomId}`);
     const firepadRefForUsers = firepadRef.child('users');
 
-    firepadRefForUsers.on("child_added", (snapshot) => {
-      const newUserName = snapshot.key;
-      users.push(newUserName);
-      setUserName(Array.from(new Set<string>(users)));
-    });
-
-    firepadRefForUsers.on("child_removed", (snapshot) => {
-      const userList = snapshot.key;
-      const newList = users.filter(value => {
-        return value !== userList;
-      })
-      setUserName(Array.from(new Set<string>(newList)));
+    firepadRef.on("value", (snapshot) => {
+      const userList = snapshot.val()?.users;
+      const newUserList = [];
+      for (const user in userList) {
+        if (userList.hasOwnProperty(user)) {
+          newUserList.push({
+            name: user,
+            color: userList[user].color
+          });
+        }
+      }
+      setUserName(newUserList);
     });
 
     if (sessionInfo.sessionType === Session.Type.CANDIDATE) {
