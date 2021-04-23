@@ -18,7 +18,29 @@ const Firepad = require("firepad");
 
 require("codemirror/mode/javascript/javascript");
 
+ function setupEditor(editor: CodeMirror.Editor, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, currentUser: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void) {
+  editor = CodeMirror(document.getElementById("editor"), options);
+
+  // Create Firepad
+  const firepad = Firepad.fromCodeMirror(firepadRef, editor, {
+    userId: currentUser,
+  });
+
+  firepad.on("cursor", function (params) {
+    const cursor = document.querySelector(`[data-clientid="${params}"]`);
+    if (cursor) {
+      cursor.innerHTML = `<span>${params}</span>`;
+      if (!isInViewport(cursor)) {
+        setShowToast(true)
+      } else {
+        setShowToast(false)
+      }
+    }
+  });
+}
+
 function App() {
+  let myName: string = ""
   const [users, setUserName] = useState([]);
   const [showToast, setShowToast] = useState(false);
 
@@ -42,21 +64,28 @@ function App() {
     lineNumbers: true,
   };
 
+  const setupFirepad = (firepadRef: firebase.database.Reference) => {
+    setupEditor(editor, options, firepadRef, myName, setShowToast);
+  };
+
   const setNewConnection = useCallback((sessionInfo: Session.Info) => {
-    users.push(sessionInfo.userName);
-    setUserName([...users]);
+    myName = sessionInfo.userName;
 
     const app = firebase.initializeApp(firebaseConfig);
 
     // Get Firebase Database reference.
     const firepadRef = firebase.database(app).ref(`sessions/${sessionInfo.roomId}`);
+    const firepadRefForUsers = firepadRef.child('users');
 
     firepadRef.on("value", (snapshot) => {
       const userList = snapshot.val()?.users;
       const newUserList = [];
       for (const user in userList) {
         if (userList.hasOwnProperty(user)) {
-          newUserList.push(user);
+          newUserList.push({
+            name: user,
+            color: userList[user].color
+          });
         }
       }
       setUserName(newUserList);
@@ -65,24 +94,8 @@ function App() {
     if (sessionInfo.sessionType === Session.Type.CANDIDATE) {
       options.mode = "";
     }
-    editor = CodeMirror(document.getElementById("editor"), options);
 
-    // Create Firepad
-    const firepad = Firepad.fromCodeMirror(firepadRef, editor, {
-      userId: users[0],
-    });
-
-    firepad.on("cursor", function (params) {
-      const cursor = document.querySelector(`[data-clientid="${params}"]`);
-      if (cursor) {
-        cursor.innerHTML = `<span>${params}</span>`;
-        if (!isInViewport(cursor)) {
-          setShowToast(true)
-        } else {
-          setShowToast(false)
-        }
-      }
-    });
+    setupFirepad(firepadRef);
   }, []);
 
   return (
@@ -92,7 +105,7 @@ function App() {
         <Toast.Body>Scroll to see more!</Toast.Body>
       </Toast>
       <div id={"editor"} className={"react-codemirror2"} />
-      <StatusBar userName={users} />
+      <StatusBar userList={users} />
     </>
   );
 }

@@ -1,37 +1,41 @@
 import * as React from "react";
-import { Button, Nav, Navbar } from "react-bootstrap";
+import {Button, Nav, Navbar} from "react-bootstrap";
 
-export const StatusBar = (props: { userName: string[] }): JSX.Element => {
-  let navbar: JSX.Element = <></>;
-  if (props.userName && props.userName.length > 0) {
-    const getButton = () => {
-      const buttons = [];
-      for (let index = 0; index < props.userName.length; index++) {
+const getButton = (props: { userList: User[] }) => {
+    const buttons = [];
+    for (let index = 0; props.userList && index < props.userList.length; index++) {
+        const {color, name} = props.userList[index];
+        const UserCss = {
+            color: color,
+            borderColor: color
+        }
         buttons.push(
           <Button
-            key={index}
-            size="sm"
-            variant="outline-info"
-            disabled
-            className="pull-left"
-            text-align="right"
+              key={index}
+              size="sm"
+              variant="outline-info"
+              disabled
+              style={UserCss}
+              className="pull-left"
+              text-align="right"
           >
-            {props.userName[index]}
+            {name}
           </Button>,
-        );
-        buttons.push(<>&nbsp;</>);
-      }
-      return buttons;
-    };
+      );
+      buttons.push(<>&nbsp;</>);
+    }
+    return buttons;
+};
+
+export const StatusBar = (props: { userList: User[] }): JSX.Element => {
+    let navbar: JSX.Element;
     navbar = (
-      <>
-        <Navbar className="fixedBar" bg="dark" fixed="bottom">
-          {" "}
-          {/*Bootstrap*/}
-          <Nav className="mr-auto right30 navbar-nav">{getButton()}</Nav>
-        </Navbar>
-      </>
+        <>
+            <Navbar className="fixedBar" bg="dark" fixed="bottom">
+                {" "}
+                <Nav className="mr-auto right30 navbar-nav">{getButton(props)}</Nav>
+            </Navbar>
+        </>
     );
-  }
-  return navbar;
+    return navbar;
 };
