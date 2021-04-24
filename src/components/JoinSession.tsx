@@ -4,6 +4,11 @@ import {Alert, Button, FormControl, InputGroup, Modal} from "react-bootstrap";
 import * as queryString from "querystring";
 import { ParsedUrlQuery } from "querystring";
 import { Session } from "../utils/Session";
+import {
+  Link
+} from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHistory } from "@fortawesome/free-solid-svg-icons";
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
@@ -93,6 +98,19 @@ export const JoinSession = (props: {
     }
     return <>{btn}</>;
   };
+
+
+  const getHistoryButton = () => {
+    let btn: JSX.Element = (<></>);
+    if (!query.sessionId) {
+      btn = (<div>
+        <FontAwesomeIcon color="#007bff" icon={faHistory}/>
+        <Link to="/history"> History</Link>
+      </div>)
+    }
+    return btn;
+  };
+
   return (
     <>
       <Modal show={show}>
@@ -107,7 +125,21 @@ export const JoinSession = (props: {
             <FormControl defaultValue={storedInfo.userName} onKeyDown={handleEnter}/>
           </InputGroup>
         </Modal.Body>
-        <Modal.Footer>{getButton()}</Modal.Footer>
+        <Modal.Footer>
+
+          <div className="container">
+            <div className="row align-items-center">
+              <div className="col-8 no-padding">
+                {
+                  getHistoryButton()
+                }
+              </div>
+              <div className="col-4 no-padding session-btn">
+                <Link to="/history">{getButton()}</Link>
+              </div>
+            </div>
+          </div>
+        </Modal.Footer>
       </Modal>
       <Modal show={showInfo} onHide={() => {
         setShowInfo(false)
