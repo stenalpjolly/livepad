@@ -33,7 +33,7 @@ body {
     z-index: 4000;
   }
 
-  .history{
+  .history {
     .code-data {
       margin: 10px;
       color: #cbccc6;
@@ -42,7 +42,7 @@ body {
         opacity: 0.5;
         color: #cbccc6;
       }
-     }
+    }
 
     .panel {
       position: absolute;
@@ -118,6 +118,7 @@ body {
     padding-bottom: 8px;
     padding-top: 8px;
     border-bottom: #cbccc6 solid 1px;
+
     .user-name {
       display: flex;
       align-items: center;
