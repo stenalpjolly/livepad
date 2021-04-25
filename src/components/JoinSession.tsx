@@ -7,7 +7,7 @@ import {Session} from "../utils/Session";
 import {Link} from "react-router-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faHistory} from "@fortawesome/free-solid-svg-icons";
-import {createSessionSnapshot, getHistoryCount} from "../utils/LocalStore"
+import {createSessionSnapshot, getAllHistory, getHistoryCount} from "../utils/LocalStore"
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
@@ -106,8 +106,39 @@ export const JoinSession = (props: {
     if (!query.sessionId && historyInstanceCount > 0) {
       btn = (<div className="font-1-rem">
         <FontAwesomeIcon color="#007bff" icon={faHistory}/>
-        <Link to="/history"> History</Link>
+        &nbsp;Recent History
+        {/*<Link to="/history?sessionId=1619368809894"> History</Link>*/}
       </div>)
+    }
+    return btn;
+  };
+
+  const getHistoryList = () => {
+    const btn =  [];
+    const allHistory = getAllHistory();
+
+    if (!query.sessionId  && allHistory.length > 0) {
+      const count = Math.min(allHistory.length, 5);
+      for (let index = 0; index < count; index++) {
+        const historySessionId = allHistory[index];
+        let  newDate = new Date(0);
+        newDate.setUTCMilliseconds(parseInt(historySessionId))
+        btn.push(
+            <div className="row user-list-row">
+              <div className="col-10 font-1-rem user-name">
+                {newDate.toLocaleString()}
+              </div>
+              <div className="col-2">
+                <Link to={`/history?sessionId=${historySessionId}`}>
+                <Button variant="outline-info" size="sm">
+                  Play
+                </Button>
+                </Link>
+              </div>
+            </div>
+        );
+      }
+
     }
     return btn;
   };
@@ -139,6 +170,9 @@ export const JoinSession = (props: {
                 {getButton()}
               </div>
             </div>
+          </div>
+          <div className="container no-padding">
+            {getHistoryList()}
           </div>
         </Modal.Footer>
       </Modal>

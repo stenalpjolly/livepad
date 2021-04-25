@@ -1,14 +1,10 @@
 /** History Data structure sample
  *
  * {
- *     "123": [
- *         {
- *             data: "Content"
- *         },
- *         {
- *             data: "Content"
- *         }
- *     ]
+ *     "123": {
+ *         users: ["User1", "User2"],
+ *         data: ["data1", "data2"]
+ *     }
  * }
  * **/
 
@@ -28,7 +24,7 @@ function updateHistory(historyData){
 
 export function getHistoryList(sessionId){
     const history = getHistoryInstance();
-    return history[sessionId];
+    return history[sessionId].data;
 }
 
 export function getHistoryCount(){
@@ -36,12 +32,17 @@ export function getHistoryCount(){
     return Object.keys(history)?.length || 0;
 }
 
+export function getAllHistory(){
+    const history = getHistoryInstance();
+    return Object.keys(history).sort().reverse();
+}
+
 export function createSessionSnapshot(sessionId: string, data?: string){
     const history = getHistoryInstance();
-    history[sessionId] = history[sessionId] || [];
+    history[sessionId] = history[sessionId] || {data: []};
     const lastData = history[sessionId][history[sessionId].length - 1];
     if (data !== undefined && lastData !== data) {
-        history[sessionId].push(data);
+        history[sessionId].data.push(data);
     }
     updateHistory(history);
 }

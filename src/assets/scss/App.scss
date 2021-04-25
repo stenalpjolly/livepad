@@ -113,6 +113,17 @@ body {
     }
   }
 
+  .user-list-row {
+    background-color: #efefef;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    border-bottom: #cbccc6 solid 1px;
+    .user-name {
+      display: flex;
+      align-items: center;
+    }
+  }
+
   .font-1-rem {
     font-size: 1rem;
   }
