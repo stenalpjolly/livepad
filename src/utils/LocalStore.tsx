@@ -26,6 +26,11 @@ function updateHistory(historyData){
     localStorage.setItem("history", JSON.stringify(historyData))
 }
 
+export function getHistoryList(sessionId){
+    const history = getHistoryInstance();
+    return history[sessionId];
+}
+
 export function getHistoryCount(){
     const history = getHistoryInstance();
     return Object.keys(history)?.length || 0;

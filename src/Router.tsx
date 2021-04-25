@@ -5,6 +5,7 @@ import {
     Route,
 } from "react-router-dom";
 import App from "./components/App";
+import {HistoryComponent} from "./components/History"
 
 export default function RouterComponent() {
     return (
@@ -14,17 +15,9 @@ export default function RouterComponent() {
                     <App />
                 </Route>
                 <Route path="/history">
-                    <History />
+                    <HistoryComponent />
                 </Route>
             </Switch>
         </Router>
-    );
-}
-
-function History() {
-    return (
-        <div>
-            <h2>About</h2>
-        </div>
     );
 }

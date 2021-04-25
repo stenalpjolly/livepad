@@ -104,7 +104,7 @@ export const JoinSession = (props: {
     let btn: JSX.Element = (<></>);
     const historyInstanceCount = getHistoryCount();
     if (!query.sessionId && historyInstanceCount > 0) {
-      btn = (<div>
+      btn = (<div className="font-1-rem">
         <FontAwesomeIcon color="#007bff" icon={faHistory}/>
         <Link to="/history"> History</Link>
       </div>)
