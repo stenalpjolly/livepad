@@ -10,6 +10,7 @@ import firebase from "firebase";
 import { Session } from "../utils/Session";
 import { EditorConfiguration } from "codemirror";
 import {Toast} from "react-bootstrap";
+import {createSessionSnapshot} from "../utils/LocalStore";
 
 require("firebase/firebase-database");
 
@@ -18,7 +19,7 @@ const Firepad = require("firepad");
 
 require("codemirror/mode/javascript/javascript");
 
- function setupEditor(editor: CodeMirror.Editor, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, currentUser: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void) {
+ function setupEditor(editor: CodeMirror.Editor, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, currentUser: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void, roomId: string) {
   editor = CodeMirror(document.getElementById("editor"), options);
 
   // Create Firepad
@@ -37,6 +38,10 @@ require("codemirror/mode/javascript/javascript");
       }
     }
   });
+
+  firepad.on("synced", function () {
+    createSessionSnapshot(roomId, firepad.getText());
+  })
 }
 
 function App() {
@@ -64,8 +69,8 @@ function App() {
     lineNumbers: true,
   };
 
-  const setupFirepad = (firepadRef: firebase.database.Reference) => {
-    setupEditor(editor, options, firepadRef, myName, setShowToast);
+  const setupFirepad = (firepadRef: firebase.database.Reference, roomId: string) => {
+    setupEditor(editor, options, firepadRef, myName, setShowToast, roomId);
   };
 
   const setNewConnection = useCallback((sessionInfo: Session.Info) => {
@@ -75,7 +80,6 @@ function App() {
 
     // Get Firebase Database reference.
     const firepadRef = firebase.database(app).ref(`sessions/${sessionInfo.roomId}`);
-    const firepadRefForUsers = firepadRef.child('users');
 
     firepadRef.on("value", (snapshot) => {
       const userList = snapshot.val()?.users;
@@ -95,7 +99,7 @@ function App() {
       options.mode = "";
     }
 
-    setupFirepad(firepadRef);
+    setupFirepad(firepadRef, sessionInfo.roomId);
   }, []);
 
   return (

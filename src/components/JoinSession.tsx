@@ -1,14 +1,13 @@
 import * as React from "react";
-import { useState } from "react";
+import {useState} from "react";
 import {Alert, Button, FormControl, InputGroup, Modal} from "react-bootstrap";
 import * as queryString from "querystring";
-import { ParsedUrlQuery } from "querystring";
-import { Session } from "../utils/Session";
-import {
-  Link
-} from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHistory } from "@fortawesome/free-solid-svg-icons";
+import {ParsedUrlQuery} from "querystring";
+import {Session} from "../utils/Session";
+import {Link} from "react-router-dom";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faHistory} from "@fortawesome/free-solid-svg-icons";
+import {createSessionSnapshot, getHistoryCount} from "../utils/LocalStore"
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
@@ -46,6 +45,7 @@ export const JoinSession = (props: {
         sessionType: Session.Type.HOST,
       };
       localStorage.setItem(session.roomId, JSON.stringify(session));
+      createSessionSnapshot(session.roomId)
       props.setConnection(session);
       setShowInfo(true);
     }
@@ -102,7 +102,8 @@ export const JoinSession = (props: {
 
   const getHistoryButton = () => {
     let btn: JSX.Element = (<></>);
-    if (!query.sessionId) {
+    const historyInstanceCount = getHistoryCount();
+    if (!query.sessionId && historyInstanceCount > 0) {
       btn = (<div>
         <FontAwesomeIcon color="#007bff" icon={faHistory}/>
         <Link to="/history"> History</Link>
@@ -135,7 +136,7 @@ export const JoinSession = (props: {
                 }
               </div>
               <div className="col-4 no-padding session-btn">
-                <Link to="/history">{getButton()}</Link>
+                {getButton()}
               </div>
             </div>
           </div>
