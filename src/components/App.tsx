@@ -39,9 +39,11 @@ require("codemirror/mode/javascript/javascript");
     }
   });
 
-  firepad.on("synced", function () {
-    createSessionSnapshot(roomId, firepad.getText());
-  })
+  firepadRef.child("history").on("value", function () {
+      setTimeout(() => {
+          createSessionSnapshot(roomId, firepad.getText());
+      }, 100);
+  });
 }
 
 function App() {

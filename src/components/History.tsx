@@ -28,7 +28,7 @@ function moveNext(setData: (value: (((prevState: string) => string) | string)) =
     if (count < 0 || count >= historyData.length) {
         count = 0;
     }
-    setPr( `${count / historyData.length * 100}%` );
+    setPr( `${count / (historyData.length - 1) * 100}%` );
 }
 
 export const HistoryComponent = () => {
@@ -75,7 +75,7 @@ export const HistoryComponent = () => {
                     </div>
                     <div className="counter">
                         <span>
-                        {`${count} / ${historyData.length}`}
+                        {`${count} / ${historyData.length - 1}`}
                         </span>
                     </div>
                 </div>
