@@ -1,10 +1,10 @@
 import * as React from "react";
+import {useEffect, useState} from "react";
 import * as queryString from "querystring";
 import {ParsedUrlQuery} from "querystring";
 import {getHistoryList} from "../utils/LocalStore";
-import {useEffect, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import * as icons from "@fortawesome/free-solid-svg-icons";
+import {faPlay, faPause, faFastBackward, faFastForward} from "@fortawesome/free-solid-svg-icons";
 
 let currentSpeed = 1;
 let count = 0;
@@ -52,17 +52,17 @@ export const HistoryComponent = () => {
             <div className="panel">
                 <div className="background">
                     <div className="btns">
-                        <FontAwesomeIcon color="#424350" size="lg" icon={icons.faFastBackward} onClick={()=>{
+                        <FontAwesomeIcon color="#424350" size="lg" icon={faFastBackward} onClick={()=>{
                             currentSpeed = 0;
                             moveNext(setData, setMarginPercentage, historyData, -1);
                         }}/>
-                        <FontAwesomeIcon color="#424350" size="lg" icon={icons.faPlay} onClick={()=>{
+                        <FontAwesomeIcon color="#424350" size="lg" icon={faPlay} onClick={()=>{
                             currentSpeed = 1;
                         }}/>
-                        <FontAwesomeIcon color="#424350" size="lg" icon={icons.faPause} onClick={()=>{
+                        <FontAwesomeIcon color="#424350" size="lg" icon={faPause} onClick={()=>{
                             currentSpeed = 0;
                         }}/>
-                        <FontAwesomeIcon color="#424350" size="lg" icon={icons.faFastForward} onClick={()=>{
+                        <FontAwesomeIcon color="#424350" size="lg" icon={faFastForward} onClick={()=>{
                             currentSpeed = 0;
                             moveNext(setData, setMarginPercentage, historyData, 1);
                         }}/>
