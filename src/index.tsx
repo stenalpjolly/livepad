@@ -1,6 +1,6 @@
 import * as React from "react";
 import { render } from "react-dom";
-import App from "./components/App";
+import Router from "./Router";
 
 const rootEl = document.getElementById("root");
 
@@ -11,4 +11,4 @@ declare global {
     }
 }
 
-render(<App />, rootEl);
+render(<Router />, rootEl);

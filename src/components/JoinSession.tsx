@@ -1,9 +1,13 @@
 import * as React from "react";
-import { useState } from "react";
+import {useState} from "react";
 import {Alert, Button, FormControl, InputGroup, Modal} from "react-bootstrap";
 import * as queryString from "querystring";
-import { ParsedUrlQuery } from "querystring";
-import { Session } from "../utils/Session";
+import {ParsedUrlQuery} from "querystring";
+import {Session} from "../utils/Session";
+import {Link} from "react-router-dom";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faHistory} from "@fortawesome/free-solid-svg-icons";
+import {createSessionSnapshot, getAllHistory, getHistoryCount} from "../utils/LocalStore"
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
@@ -41,6 +45,7 @@ export const JoinSession = (props: {
         sessionType: Session.Type.HOST,
       };
       localStorage.setItem(session.roomId, JSON.stringify(session));
+      createSessionSnapshot(session.roomId)
       props.setConnection(session);
       setShowInfo(true);
     }
@@ -93,6 +98,51 @@ export const JoinSession = (props: {
     }
     return <>{btn}</>;
   };
+
+
+  const getHistoryButton = () => {
+    let btn: JSX.Element = (<></>);
+    const historyInstanceCount = getHistoryCount();
+    if (!query.sessionId && historyInstanceCount > 0) {
+      btn = (<div className="font-1-rem">
+        <FontAwesomeIcon color="#007bff" icon={faHistory}/>
+        &nbsp;Recent History
+        {/*<Link to="/history?sessionId=1619368809894"> History</Link>*/}
+      </div>)
+    }
+    return btn;
+  };
+
+  const getHistoryList = () => {
+    const btn =  [];
+    const allHistory = getAllHistory();
+
+    if (!query.sessionId  && allHistory.length > 0) {
+      const count = Math.min(allHistory.length, 5);
+      for (let index = 0; index < count; index++) {
+        const historySessionId = allHistory[index];
+        let  newDate = new Date(0);
+        newDate.setUTCMilliseconds(parseInt(historySessionId))
+        btn.push(
+            <div className="row user-list-row">
+              <div className="col-10 font-1-rem user-name">
+                {newDate.toLocaleString()}
+              </div>
+              <div className="col-2">
+                <Link to={`/history?sessionId=${historySessionId}`}>
+                <Button variant="outline-info" size="sm">
+                  Play
+                </Button>
+                </Link>
+              </div>
+            </div>
+        );
+      }
+
+    }
+    return btn;
+  };
+
   return (
     <>
       <Modal show={show}>
@@ -107,7 +157,24 @@ export const JoinSession = (props: {
             <FormControl defaultValue={storedInfo.userName} onKeyDown={handleEnter}/>
           </InputGroup>
         </Modal.Body>
-        <Modal.Footer>{getButton()}</Modal.Footer>
+        <Modal.Footer>
+
+          <div className="container">
+            <div className="row align-items-center">
+              <div className="col-8 no-padding">
+                {
+                  getHistoryButton()
+                }
+              </div>
+              <div className="col-4 no-padding session-btn">
+                {getButton()}
+              </div>
+            </div>
+          </div>
+          <div className="container no-padding">
+            {getHistoryList()}
+          </div>
+        </Modal.Footer>
       </Modal>
       <Modal show={showInfo} onHide={() => {
         setShowInfo(false)
