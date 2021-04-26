@@ -7,6 +7,7 @@
  *     }
  * }
  * **/
+import {Session} from "./Session";
 
 function getHistoryInstance(){
     const history = localStorage.getItem("history");
@@ -38,6 +39,10 @@ export function getAllHistory(){
 }
 
 export function createSessionSnapshot(sessionId: string, data?: string){
+    const sessionInfo: Session.Info = JSON.parse(localStorage.getItem(sessionId) || "{}");
+    if (sessionInfo.sessionType !== Session.Type.HOST) {
+        return;
+    }
     const history = getHistoryInstance();
     history[sessionId] = history[sessionId] || {data: []};
     const lastData = history[sessionId][history[sessionId].length - 1];
