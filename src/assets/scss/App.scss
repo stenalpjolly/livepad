@@ -13,11 +13,11 @@ body {
     height: 100%;
     width: 100%;
     position: fixed;
+    padding-bottom: 50px;
   }
 
   .CodeMirror {
     height: 100%;
-    padding-bottom: 50px;
   }
 
   .other-client span {
@@ -34,15 +34,8 @@ body {
   }
 
   .history {
-    .code-data {
-      margin: 10px;
-      color: #cbccc6;
-
-      .line-number {
-        opacity: 0.5;
-        color: #cbccc6;
-      }
-    }
+    height: 100%;
+    padding-bottom: 0 !important;
 
     .panel {
       position: absolute;
@@ -50,6 +43,7 @@ body {
       bottom: 20px;
       width: 80%;
       height: 40px;
+      z-index: 99;
 
       .background {
         width: 100%;
