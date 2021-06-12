@@ -53,7 +53,6 @@ export const JoinSession = (props: {
   };
 
   const copyToClipboard = str => {
-    console.log(str);
     const el = document.createElement('textarea');
     el.value = str;
     document.body.appendChild(el);
@@ -194,7 +193,7 @@ export const JoinSession = (props: {
           <Modal.Footer>
             <Button variant="success" onClick={()=>{
               setShowInfo(false)
-            }}>Start Session</Button>
+            }}>Continue</Button>
           </Modal.Footer>
         </Modal>
       </>
