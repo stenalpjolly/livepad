@@ -109,16 +109,22 @@ body {
     }
   }
 
-  .user-list-row {
+  .history-list-row {
     background-color: #efefef;
     padding-bottom: 8px;
     padding-top: 8px;
     border-bottom: #cbccc6 solid 1px;
+  }
 
-    .user-name {
-      display: flex;
-      align-items: center;
-    }
+  .session-title {
+    display: flex;
+    align-items: center;
+  }
+
+  .history-list-title {
+    padding-bottom: 8px;
+    padding-top: 8px;
+    border-bottom: #007bff solid 1px;
   }
 
   .font-1-rem {
@@ -149,6 +155,10 @@ body {
   .pulseit {
     -webkit-animation: pulse ease-in 2s infinite;
     animation: pulse ease-in 2s infinite;
+  }
+
+  .modal-content {
+    font-family: "Courier New", Courier, monospace;
   }
 
   @-webkit-keyframes pulse {

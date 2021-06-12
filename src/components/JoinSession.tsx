@@ -6,13 +6,14 @@ import {ParsedUrlQuery} from "querystring";
 import {Session} from "../utils/Session";
 import {Link} from "react-router-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faHistory} from "@fortawesome/free-solid-svg-icons";
+import {faHistory,faPlayCircle,faCopy,faShareAlt} from "@fortawesome/free-solid-svg-icons";
 import {createSessionSnapshot, getAllHistory, getHistoryCount} from "../utils/LocalStore"
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
 }): JSX.Element => {
   const [show, setShow] = useState(true);
+  const [userSessionName, setUserSessionName] = useState("world");
   const [showInfo, setShowInfo] = useState(false);
   const [newUrl, setNewUrl] = useState("");
   const query: ParsedUrlQuery = queryString.decode(location.search, "?", "=");
@@ -20,8 +21,8 @@ export const JoinSession = (props: {
 
   const handleClose = (): string => {
     const userName = document
-      .getElementById("username")
-      .getElementsByTagName("input")[0].value;
+        .getElementById("username")
+        .getElementsByTagName("input")[0].value;
     if (userName) {
       setShow(false);
       return userName;
@@ -73,8 +74,8 @@ export const JoinSession = (props: {
     }
   };
 
-  const handleEnter = (target) =>{
-    if (target && target.code === "Enter") {
+  const handleEnter = (event) => {
+    if (event && event.code === "Enter") {
       if (query.sessionId) {
         joinSession();
       } else {
@@ -83,17 +84,22 @@ export const JoinSession = (props: {
     }
   }
 
-  const getButton = () => {
+  const handleUserNameChange = (event) => {
+    const userName = event.target.value;
+    setUserSessionName(userName||"world");
+  }
+
+  const sessionPrimaryButton = () => {
     let btn: JSX.Element = (
-      <Button variant="primary" onClick={createSession}>
-        Create Session
-      </Button>
+        <Button variant="primary" onClick={createSession}>
+          Create Session
+        </Button>
     );
     if (query.sessionId) {
       btn = (
-        <Button variant="primary" onClick={joinSession}>
-          Join Session
-        </Button>
+          <Button variant="primary" onClick={joinSession}>
+            Join Session
+          </Button>
       );
     }
     return <>{btn}</>;
@@ -106,7 +112,7 @@ export const JoinSession = (props: {
     if (!query.sessionId && historyInstanceCount > 0) {
       btn = (<div className="font-1-rem">
         <FontAwesomeIcon color="#007bff" icon={faHistory}/>
-        &nbsp;Recent History
+        &nbsp;Recent Sessions
         {/*<Link to="/history?sessionId=1619368809894"> History</Link>*/}
       </div>)
     }
@@ -118,22 +124,25 @@ export const JoinSession = (props: {
     const allHistory = getAllHistory();
 
     if (!query.sessionId  && allHistory.length > 0) {
+      btn.push(
+          <div className="row history-list-title mt-1 rounded p-2">
+            <div className="font-1-rem mb"><FontAwesomeIcon color="#007bff" icon={faHistory}/><span className="ml-1">Recent Sessions</span></div>
+          </div>
+      )
       const count = Math.min(allHistory.length, 5);
       for (let index = 0; index < count; index++) {
         const historySessionId = allHistory[index];
         let  newDate = new Date(0);
         newDate.setUTCMilliseconds(parseInt(historySessionId))
         btn.push(
-            <div className="row user-list-row">
-              <div className="col-10 font-1-rem user-name">
-                {newDate.toLocaleString()}
-              </div>
-              <div className="col-2">
+            <div className="row history-list-row rounded p-2">
+              <div className="col-1">
                 <Link to={`/history?sessionId=${historySessionId}`}>
-                <Button variant="outline-info" size="sm">
-                  Play
-                </Button>
+                  <FontAwesomeIcon color="#007bff" title="Play" className="fa-lg" icon={faPlayCircle}/>
                 </Link>
+              </div>
+              <div className="col-10 font-1-rem session-title">
+                {newDate.toLocaleString()}
               </div>
             </div>
         );
@@ -144,55 +153,49 @@ export const JoinSession = (props: {
   };
 
   return (
-    <>
-      <Modal show={show}>
-        <Modal.Header>
-          <Modal.Title>Session</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <InputGroup id="username" className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>Name</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl defaultValue={storedInfo.userName} onKeyDown={handleEnter}/>
-          </InputGroup>
-        </Modal.Body>
-        <Modal.Footer>
-
-          <div className="container">
-            <div className="row align-items-center">
-              <div className="col-8 no-padding">
-                {
-                  getHistoryButton()
-                }
-              </div>
-              <div className="col-4 no-padding session-btn">
-                {getButton()}
+      <>
+        <Modal show={show}>
+          <Modal.Header>
+            <Modal.Title>Hello, {userSessionName}!</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <InputGroup id="username" className="mb-3">
+              <InputGroup.Prepend>
+                <InputGroup.Text>Name</InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl defaultValue={storedInfo.userName} onChange={handleUserNameChange} onKeyDown={handleEnter}/>
+            </InputGroup>
+          </Modal.Body>
+          <Modal.Footer>
+            <div className="no-padding session-btn">
+              {sessionPrimaryButton()}
+            </div>
+            <div className="container">
+              <div className="no-padding">
+                <div className="container no-padding">
+                  {getHistoryList()}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="container no-padding">
-            {getHistoryList()}
-          </div>
-        </Modal.Footer>
-      </Modal>
-      <Modal show={showInfo} onHide={() => {
-        setShowInfo(false)
-      }}>
-        <Modal.Header>
-          <Modal.Title>URL copied to clipboard</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Alert variant='info'>
-            {newUrl}
-          </Alert>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="success" onClick={()=>{
-            setShowInfo(false)
-          }}>Share</Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+          </Modal.Footer>
+        </Modal>
+        <Modal size="lg" show={showInfo} onHide={() => {
+          setShowInfo(false)
+        }}>
+          <Modal.Header>
+            <Modal.Title><FontAwesomeIcon color="#28a745" icon={faShareAlt} /> URL to join the session</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Alert variant='success'>
+              <span className="col-10">{newUrl}</span> <FontAwesomeIcon role="button" title="Copy to clipboard" onClick={() => copyToClipboard(newUrl)} className="float-right" color="#28a745" icon={faCopy}/>
+            </Alert>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" onClick={()=>{
+              setShowInfo(false)
+            }}>Continue</Button>
+          </Modal.Footer>
+        </Modal>
+      </>
   );
 };
