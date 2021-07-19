@@ -38,6 +38,16 @@ export function getAllHistory(){
     return Object.keys(history).sort().reverse();
 }
 
+export function limitHistoryToCount(history, count){
+    const completeHistory = getHistoryInstance();
+    const newHistory = {}
+    for (let index = 0; index < count; index++) {
+        const historyId = history[index];
+        newHistory[historyId] = completeHistory[historyId]
+    }
+    updateHistory(newHistory);
+}
+
 export function createSessionSnapshot(sessionId: string, data?: string){
     const sessionInfo: Session.Info = JSON.parse(localStorage.getItem(sessionId) || "{}");
     if (sessionInfo.sessionType !== Session.Type.HOST) {
