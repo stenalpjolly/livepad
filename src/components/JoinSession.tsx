@@ -7,7 +7,7 @@ import {Session} from "../utils/Session";
 import {Link} from "react-router-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faHistory,faPlayCircle,faCopy,faShareAlt} from "@fortawesome/free-solid-svg-icons";
-import {createSessionSnapshot, getAllHistory, getHistoryCount} from "../utils/LocalStore"
+import {createSessionSnapshot, getAllHistory, getHistoryCount, limitHistoryToCount} from "../utils/LocalStore"
 
 export const JoinSession = (props: {
   setConnection: (sessionInfo: Session.Info) => void;
@@ -147,7 +147,7 @@ export const JoinSession = (props: {
             </div>
         );
       }
-
+      limitHistoryToCount(allHistory, count);
     }
     return btn;
   };
