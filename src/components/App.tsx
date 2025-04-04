@@ -8,16 +8,35 @@ import { StatusBar } from "./StatusBar";
 import * as CodeMirror from "codemirror";
 import firebase from "firebase";
 import { Session } from "../utils/Session";
-import { EditorConfiguration } from "codemirror";
+import { EditorConfiguration, Editor, Position } from "codemirror"; // Remove SearchCursor import
+
+// Augment CodeMirror interface to include addon methods
+declare module "codemirror" {
+  // Define SearchCursor interface if not implicitly available (safer approach)
+  interface SearchCursor {
+    findNext(): boolean;
+    findPrevious(): boolean;
+    from(): Position;
+    to(): Position;
+    replace(text: string, origin?: string): void;
+  }
+  interface Editor {
+    // Reference the SearchCursor type defined above or implicitly available
+    getSearchCursor(query: string | RegExp, start?: Position, caseFold?: boolean): SearchCursor;
+  }
+}
+
 import {Toast} from "react-bootstrap";
 import {createSessionSnapshot} from "../utils/LocalStore";
 
 require("firebase/firebase-database");
+require("firebase/storage"); // Import Firebase Storage
 
 global.CodeMirror = CodeMirror;
 const Firepad = require("firepad");
 
 require("codemirror/mode/javascript/javascript");
+require("codemirror/addon/search/searchcursor"); // Import search cursor addon
 
  function setupEditor(editor: CodeMirror.Editor, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, currentUser: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void, roomId: string) {
   editor = CodeMirror(document.getElementById("editor"), options);
@@ -44,6 +63,171 @@ require("codemirror/mode/javascript/javascript");
           createSessionSnapshot(roomId, firepad.getText());
       }, 100);
   });
+
+  // --- Render existing images on load ---
+  firepad.on('ready', () => {
+    console.log("Firepad ready, rendering existing images...");
+    renderExistingImages(editor);
+  });
+  // --- End render existing images ---
+
+  // Add DOM paste event listener for image handling
+  editor.getWrapperElement().addEventListener('paste', (event: ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    let imageFound = false;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith('image/')) {
+        imageFound = true;
+        event.preventDefault(); // Prevent default paste behavior for the image
+
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        const timestamp = Date.now();
+        const filename = `image-${timestamp}-${currentUser}-${i}.${file.name.split('.').pop() || 'png'}`;
+        const storagePath = `images/${roomId}/${filename}`;
+        const storageRef = firebase.storage().ref(storagePath);
+
+        // --- Upload Indicator Logic ---
+        const placeholderText = `[Uploading ${file.name}...]`;
+        const startPosPlaceholder = editor.getCursor();
+        editor.replaceSelection(placeholderText);
+        const endPosPlaceholder = editor.getCursor();
+
+        // Create visual loading indicator
+        const loadingIndicator = document.createElement('span');
+        loadingIndicator.textContent = `⏳ Uploading ${file.name}...`;
+        loadingIndicator.style.fontStyle = 'italic';
+        loadingIndicator.style.color = '#888'; // Style as needed
+
+        // Mark the placeholder text and replace it visually
+        const marker = editor.markText(startPosPlaceholder, endPosPlaceholder, {
+          replacedWith: loadingIndicator,
+          atomic: true
+        });
+        // --- End Upload Indicator Logic ---
+
+        console.log(`Uploading ${filename} to ${storagePath}...`);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            // Update loading indicator with progress
+            const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            loadingIndicator.textContent = `⏳ Uploading ${file.name} (${progress}%)...`;
+            console.log('Upload is ' + progress + '% done');
+          },
+          (error) => {
+            // Handle unsuccessful uploads
+            console.error("Error uploading image:", error);
+            const errorText = `[Upload Failed: ${file.name}]`;
+            const range = marker.find();
+            if (range) {
+              editor.replaceRange(errorText, range.from, range.to);
+            }
+            marker.clear(); // Clear the visual marker
+            // Optionally: Show a more prominent error message to the user
+          },
+          () => {
+            // Handle successful uploads on complete
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              console.log('File available at', downloadURL);
+              const markdown = `![Pasted Image](${downloadURL})`;
+
+              // Find the original placeholder range using the marker
+              const range = marker.find();
+              if (!range) {
+                  console.error("Could not find marker range after upload.");
+                  marker.clear(); // Clear marker anyway
+                  // Fallback: insert at current cursor? Or handle error better.
+                  editor.replaceSelection(markdown); // Insert at cursor as fallback
+                  return;
+              }
+
+              // Replace the placeholder text with the final markdown
+              editor.replaceRange(markdown, range.from, range.to);
+              marker.clear(); // Clear the visual marker
+
+              // Get the new range of the inserted markdown
+              const startPosFinal = range.from;
+              // Calculate end position based on start and markdown length
+              const endPosFinal = { line: startPosFinal.line, ch: startPosFinal.ch + markdown.length };
+
+
+              // Create the image element to display
+              const img = document.createElement('img');
+              img.src = downloadURL;
+              img.alt = 'Pasted Image';
+              // Add some basic styling
+              img.style.maxWidth = '200px';
+              img.style.maxHeight = '200px';
+              img.style.verticalAlign = 'middle';
+              img.style.cursor = 'pointer';
+
+              // Replace the markdown text visually with the image
+              editor.markText(startPosFinal, endPosFinal, {
+                replacedWith: img,
+                handleMouseEvents: true,
+                atomic: true
+              });
+
+            }).catch(error => {
+              console.error("Error getting download URL:", error);
+              const errorText = `[Error getting URL: ${file.name}]`;
+               const range = marker.find();
+               if (range) {
+                 editor.replaceRange(errorText, range.from, range.to);
+               }
+               marker.clear();
+            });
+          }
+        );
+      }
+    }
+    // If no image was found, the default paste behavior will proceed naturally
+  });
+}
+
+// Function to find and render Markdown images already in the document
+function renderExistingImages(editor: CodeMirror.Editor) {
+  const regex = /!\[.*?\]\((.*?)\)/g; // Regex to find ![alt](url)
+  const cursor = editor.getSearchCursor(regex);
+
+  while (cursor.findNext()) {
+    try {
+      const match = editor.getRange(cursor.from(), cursor.to());
+      // Use a simpler regex for URL extraction from the matched string
+      const urlMatch = /\((.*?)\)/.exec(match);
+      if (!urlMatch || urlMatch.length < 2) continue;
+
+      const downloadURL = urlMatch[1];
+      const startPos = cursor.from();
+      const endPos = cursor.to();
+
+      // Create the image element
+      const img = document.createElement('img');
+      img.src = downloadURL;
+      img.alt = 'Image'; // Extract alt text if needed: match.match(/!\[(.*?)\]/)?.[1] || 'Image'
+      img.style.maxWidth = '200px';
+      img.style.maxHeight = '200px';
+      img.style.verticalAlign = 'middle';
+      img.style.cursor = 'pointer';
+
+      // Use CodeMirror's operation to batch changes for performance
+      editor.operation(() => {
+        editor.markText(startPos, endPos, {
+          replacedWith: img,
+          handleMouseEvents: true,
+          atomic: true
+        });
+      });
+    } catch (e) {
+        console.error("Error rendering existing image:", e, "at", cursor.from());
+    }
+  }
 }
 
 function App() {
