@@ -31,7 +31,7 @@
     "start-prod": "yarn run build && node express.js",
     "test": "jest --coverage --watchAll --config=configs/jest.json",
     "deploy": "yarn run build && npx firebase deploy --only hosting",
-    "cleanup:manual": "node scripts/cleanup.js" // Not working yet
+    "cleanup:manual": "node scripts/cleanup.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
