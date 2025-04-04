@@ -3,7 +3,7 @@ import "./../assets/scss/App.scss";
 import * as React from "react";
 import { hot } from "react-hot-loader";
 import { JoinSession } from "./JoinSession";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react"; // Add useRef
 import { StatusBar } from "./StatusBar";
 import * as CodeMirror from "codemirror";
 import firebase from "firebase";
@@ -26,7 +26,7 @@ declare module "codemirror" {
   }
 }
 
-import {Toast} from "react-bootstrap";
+import { Toast, Modal, Button } from "react-bootstrap"; // Add Modal and Button
 import {createSessionSnapshot} from "../utils/LocalStore";
 
 require("firebase/firebase-database");
@@ -38,8 +38,11 @@ const Firepad = require("firepad");
 require("codemirror/mode/javascript/javascript");
 require("codemirror/addon/search/searchcursor"); // Import search cursor addon
 
- function setupEditor(editor: CodeMirror.Editor, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, currentUser: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void, roomId: string) {
-  editor = CodeMirror(document.getElementById("editor"), options);
+ // Remove editor param, add editorRef param
+ function setupEditor(editorRef: React.MutableRefObject<CodeMirror.Editor | null>, options: CodeMirror.EditorConfiguration, firepadRef: firebase.database.Reference, currentUser: string, setShowToast: (value: (((prevState: boolean) => boolean) | boolean)) => void, roomId: string, handleImageClick: (imageUrl: string, range: { from: Position, to: Position }) => void) {
+  // Assign to the ref's current property
+  editorRef.current = CodeMirror(document.getElementById("editor"), options);
+  const editor = editorRef.current; // Use a local const for convenience within this function scope
 
   // Create Firepad
   const firepad = Firepad.fromCodeMirror(firepadRef, editor, {
@@ -67,7 +70,7 @@ require("codemirror/addon/search/searchcursor"); // Import search cursor addon
   // --- Render existing images on load ---
   firepad.on('ready', () => {
     console.log("Firepad ready, rendering existing images...");
-    renderExistingImages(editor);
+    renderExistingImages(editor, handleImageClick); // Pass handleImageClick down
   });
   // --- End render existing images ---
 
@@ -166,6 +169,8 @@ require("codemirror/addon/search/searchcursor"); // Import search cursor addon
               img.style.maxHeight = '200px';
               img.style.verticalAlign = 'middle';
               img.style.cursor = 'pointer';
+              // Add onclick handler
+              img.onclick = () => handleImageClick(downloadURL, { from: startPosFinal, to: endPosFinal });
 
               // Replace the markdown text visually with the image
               editor.markText(startPosFinal, endPosFinal, {
@@ -192,7 +197,7 @@ require("codemirror/addon/search/searchcursor"); // Import search cursor addon
 }
 
 // Function to find and render Markdown images already in the document
-function renderExistingImages(editor: CodeMirror.Editor) {
+function renderExistingImages(editor: CodeMirror.Editor, handleImageClick: (imageUrl: string, range: { from: Position, to: Position }) => void) { // Add handleImageClick param
   const regex = /!\[.*?\]\((.*?)\)/g; // Regex to find ![alt](url)
   const cursor = editor.getSearchCursor(regex);
 
@@ -215,6 +220,8 @@ function renderExistingImages(editor: CodeMirror.Editor) {
       img.style.maxHeight = '200px';
       img.style.verticalAlign = 'middle';
       img.style.cursor = 'pointer';
+      // Add onclick handler
+      img.onclick = () => handleImageClick(downloadURL, { from: startPos, to: endPos });
 
       // Use CodeMirror's operation to batch changes for performance
       editor.operation(() => {
@@ -234,8 +241,20 @@ function App() {
   let myName: string = ""
   const [users, setUserName] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  // State for image modal
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+  const [modalImageRange, setModalImageRange] = useState<{ from: Position, to: Position } | null>(null);
 
-  let editor: CodeMirror.Editor;
+  // Function to open the image modal - DEFINED INSIDE App
+  const handleImageClick = (imageUrl: string, range: { from: Position, to: Position }) => {
+    setModalImageUrl(imageUrl);
+    setModalImageRange(range);
+    setShowImageModal(true);
+  };
+
+  // Use useRef to hold the editor instance
+  const editorRef = useRef<CodeMirror.Editor | null>(null);
 
   const firebaseConfig = {
     apiKey: "AIzaSyCz-v0dUj8n0IEBaW7Y_jcTdMK0Bl5aEn4",
@@ -256,7 +275,9 @@ function App() {
   };
 
   const setupFirepad = (firepadRef: firebase.database.Reference, roomId: string) => {
-    setupEditor(editor, options, firepadRef, myName, setShowToast, roomId);
+    // Pass handleImageClick down to setupEditor
+    // Pass the ref instead of the variable
+    setupEditor(editorRef, options, firepadRef, myName, setShowToast, roomId, handleImageClick);
   };
 
   const setNewConnection = useCallback((sessionInfo: Session.Info) => {
@@ -296,6 +317,41 @@ function App() {
       </Toast>
       <div id={"editor"} className={"react-codemirror2"} />
       <StatusBar userList={users} />
+
+      {/* Image Preview Modal */}
+      <Modal show={showImageModal} onHide={() => setShowImageModal(false)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Image Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          {modalImageUrl && <img src={modalImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '70vh' }} />}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowImageModal(false)}>
+            Close
+          </Button>
+          {/* Download Button - Render as an anchor tag */}
+          <Button as="a" variant="primary" href={modalImageUrl || '#'} target="_blank" download>
+            Download
+          </Button>
+          {/* Remove Button */}
+          <Button variant="danger" onClick={() => {
+            // Access editor via the ref's current property
+            const currentEditor = editorRef.current;
+            if (modalImageRange && currentEditor) { // Ensure range and editor exist
+              currentEditor.operation(() => { // Use operation for atomic change
+                 currentEditor.replaceRange('', modalImageRange.from, modalImageRange.to);
+              });
+              setShowImageModal(false); // Close modal after removing
+            } else {
+              console.error("Cannot remove image: range or editor not available.");
+              // Optionally show an error to the user
+            }
+          }}>
+            Remove
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }
