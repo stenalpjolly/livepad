@@ -57,7 +57,7 @@ export function createSessionSnapshot(sessionId: string, data?: string){
     history[sessionId] = history[sessionId] || {data: []};
     const lastData = history[sessionId][history[sessionId].length - 1];
     if (data !== undefined && lastData !== data) {
-        history[sessionId].data.push(data);
+        // history[sessionId].data.push(data);
     }
-    updateHistory(history);
+    // updateHistory(history);
 }

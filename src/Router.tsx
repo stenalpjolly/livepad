@@ -5,7 +5,6 @@ import {
     Route,
 } from "react-router-dom";
 import App from "./components/App";
-import {HistoryComponent} from "./components/History"
 
 export default function RouterComponent() {
     return (
@@ -13,9 +12,6 @@ export default function RouterComponent() {
             <Switch>
                 <Route exact path="/">
                     <App />
-                </Route>
-                <Route path="/history">
-                    <HistoryComponent />
                 </Route>
             </Switch>
         </Router>
